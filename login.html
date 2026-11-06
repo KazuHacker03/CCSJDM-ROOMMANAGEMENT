@@ -1,0 +1,335 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <link rel="icon" type="image/png" href="backgroundcc.jpg">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCSJDM | Login</title>
+
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+
+body{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:#0b0f19;
+    color:white;
+    font-family:"Segoe UI",Arial,sans-serif;
+    padding:20px;
+}
+
+.card{
+    width:100%;
+    max-width:430px;
+    padding:38px;
+    background:#151a2b;
+    border:1px solid #55418b;
+    border-radius:24px;
+    box-shadow:0 20px 70px #0008;
+}
+
+.logo{
+    width:85px;
+    height:85px;
+    margin:0 auto 20px;
+    border-radius:50%;
+    overflow:hidden;
+    border:3px solid #a855f7;
+}
+
+.logo img{
+    width:100%;
+    height:100%;
+    object-fit:cover;
+}
+
+h1{
+    text-align:center;
+    color:#c4b5fd;
+}
+
+.sub{
+    text-align:center;
+    color:#999bb5;
+    margin:8px 0 30px;
+}
+
+label{
+    display:block;
+    color:#c4b5fd;
+    margin:15px 0 8px;
+    font-size:13px;
+    font-weight:bold;
+}
+
+input{
+    width:100%;
+    padding:15px;
+    background:#0b1020;
+    border:1px solid #393653;
+    border-radius:12px;
+    color:white;
+    outline:none;
+}
+
+input:focus{
+    border-color:#c026d3;
+}
+
+button{
+    width:100%;
+    padding:15px;
+    margin-top:25px;
+    border:0;
+    border-radius:12px;
+    background:linear-gradient(120deg,#7011ce,#c026d3,#3b82f6);
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+#message{
+    margin-top:15px;
+    text-align:center;
+    color:#fca5a5;
+    font-size:14px;
+}
+
+a{
+    color:#c4b5fd;
+    text-decoration:none;
+}
+
+.links{
+    text-align:center;
+    margin-top:25px;
+    color:#aaa;
+
+    /* ===== RESPONSIVE (PC + cellphone) ===== */
+@media (max-width: 480px) {
+    body {
+        padding: 14px;
+        align-items: flex-start;
+    }
+    .card {
+        margin-top: 12px;
+        padding: 26px 20px;
+        border-radius: 20px;
+    }
+    .logo {
+        width: 72px;
+        height: 72px;
+        margin-bottom: 14px;
+    }
+    h1 {
+        font-size: 1.4rem;
+    }
+    .sub {
+        margin: 6px 0 22px;
+        font-size: .9rem;
+    }
+    input {
+        font-size: 16px;
+        padding: 13px;
+    }
+    button {
+        padding: 14px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .card {
+        max-width: 460px;
+        padding: 44px;
+    }
+}
+}
+</style>
+</head>
+
+<body>
+
+<div class="card">
+
+    <div class="logo">
+        <img src="backgroundcc.jpg" alt="CCSJDM Logo">
+    </div>
+
+    <h1>CCSJDM LOGIN</h1>
+
+    <p class="sub">Scheduling & Management System</p>
+
+    <form id="loginForm">
+
+        <label>PROFESSOR</label>
+        <input type="text" id="loginID"
+        placeholder="Enter your ID" required>
+
+        <label>PASSWORD</label>
+        <input type="password" id="loginPassword"
+        placeholder="Enter your password" required>
+
+        <button type="submit" id="loginBtn">
+            SIGN IN
+        </button>
+
+    </form>
+
+    <p id="message"></p>
+
+    <div class="links">
+        Don't have an account?
+        <a href="signup.html">Create Account</a>
+    </div>
+
+</div>
+
+<script>
+
+const KEY_USERS = "ccsjdm_users";
+
+const DEFAULT_USERS = [
+  {
+    "id": "ADMIN013",
+    "fullName": "Harold",
+    "role": "admin",
+    "status": "approved",
+    "salt": "c6ee2cc08a1901cd1d9154901d2f9750",
+    "hash": "2b4b130805d946cd1d51aeb2d412fbb71122c41a8e79636cebd09f44db326ad3"
+  },
+  {
+    "id": "bingsy",
+    "fullName": "Bingsy",
+    "role": "superadmin",
+    "status": "approved",
+    "salt": "4f8ecf16ee4831e5ad27cbed4c73841c",
+    "hash": "18dca148320564bc7ee8bff1d7ec637fdc4c76be1bc8235d41f46efd5da01988"
+  },
+  {
+    "id": "editor01",
+    "fullName": "Editor Sample",
+    "role": "editor",
+    "status": "approved",
+    "salt": "88ba2cd83cfe91d7d1b9a6a54e8b7a52",
+    "hash": "140ce0b98060d6da9a6cf479f9144c52b9b8c983b71a3e6a8773f890ecf2cde1"
+  },
+  {
+    "id": "viewer01",
+    "fullName": "Viewer Sample",
+    "role": "viewer",
+    "status": "approved",
+    "salt": "ecf1a4ad9e566f974f1917988797844e",
+    "hash": "048a67c6ef2a9e37bb2f7b28a81eca0e4309304cdee98787640f85d744d4b74e"
+  }
+];
+
+function normalizeRole(r) {
+    const v = String(r || "").toLowerCase();
+    return ["superadmin", "admin", "editor", "viewer"].includes(v) ? v : "viewer";
+}
+
+// Idinadagdag lang ang default accounts kung wala pa; hindi ino-overwrite ang existing
+function seedUsers() {
+    const users = getUsers();
+    let changed = false;
+    DEFAULT_USERS.forEach(d => {
+        if (!users.some(u => String(u.id).trim().toLowerCase() === d.id.toLowerCase())) {
+            users.push(d);
+            changed = true;
+        }
+    });
+    if (changed) localStorage.setItem(KEY_USERS, JSON.stringify(users));
+}
+seedUsers();
+
+function getUsers() {
+    try {
+        return JSON.parse(localStorage.getItem(KEY_USERS)) || [];
+    } catch (e) {
+        return [];
+    }
+}
+
+const $ = id => document.getElementById(id);
+const form = $("createSchedForm");
+const dayEl = $("day"), startEl = $("startTime"), endEl = $("endTime"), roomSel = $("roomSelect");
+
+let timer;
+function scheduleCheck() {
+  clearTimeout(timer);
+  timer = setTimeout(checkRooms, 300);
+}
+
+async function checkRooms() {
+  const day = dayEl.value, start = startEl.value.trim(), end = endEl.value.trim();
+  if (!start || !end) return;
+
+  const res = await fetch(`/api/rooms?${new URLSearchParams({ day, start, end })}`);
+  if (!res.ok) {
+    $("free-rooms").innerHTML = '<p class="muted-small">Invalid time. Gamitin ang format na 9:00 AM.</p>';
+    $("conflict-box").innerHTML = "";
+    return;
+  }
+
+  const rooms = await res.json();
+  const selected = rooms.find(r => r.name === roomSel.value);
+
+  $("conflict-box").innerHTML = selected && !selected.free
+    ? `<div class="live-check-box">
+         <div class="live-check-title">${selected.name} is already booked</div>
+         <div class="live-check-desc">${day} ${start}-${end} · may conflict sa existing schedule</div>
+       </div>`
+    : "";
+
+  const free = rooms.filter(r => r.free);
+  $("free-rooms").innerHTML = free.length
+    ? free.map(r => `
+        <div class="free-room-card">
+          <div>
+            <div class="free-room-name">${r.name}</div>
+            <div class="free-room-cap">Capacity ${r.capacity}</div>
+          </div>
+          <span class="free-badge">Free</span>
+        </div>`).join("")
+    : '<p class="muted-small">Walang available na room sa oras na ito.</p>';
+}
+
+[dayEl, roomSel].forEach(el => el.addEventListener("change", checkRooms));
+[startEl, endEl].forEach(el => el.addEventListener("input", scheduleCheck));
+
+form.addEventListener("submit", async function (e) {
+  e.preventDefault();
+  const body = {
+    subject:    $("subject").value,
+    section:    $("section").value,
+    instructor: $("instructor").value,
+    program:    $("program").value,
+    day:        dayEl.value,
+    startTime:  startEl.value,
+    endTime:    endEl.value,
+    room:       roomSel.value,
+  };
+
+  const res = await fetch("/api/schedules", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error);
+    return;
+  }
+  alert("Matagumpay na naidagdag ang Class Schedule!");
+  this.reset();
+  checkRooms();
+});
+
+</script>
+
+</body>
+</html>

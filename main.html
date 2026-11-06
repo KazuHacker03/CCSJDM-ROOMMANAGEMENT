@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <link rel="icon" type="image/png" href="backgroundcc.jpg">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Class Scheduler - Room Availability & Admin Portal</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        navy: {
+                            800: '#1b2559',
+                            900: '#111c4e',
+                            950: '#0b1437',
+                        },
+                        brand: {
+                            500: '#2b52dd',
+                            600: '#2547eb',
+                        }
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7fe;
+        }
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 4px;
+        }
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+    </style>
+</head>
+<body class="h-screen flex overflow-hidden text-slate-800">
+
+    <!-- LEFT SIDEBAR -->
+    <aside class="w-64 bg-navy-900 text-white flex flex-col justify-between shrink-0 select-none border-r border-navy-800">
+        <div>
+            <!-- Header Brand -->
+            <div class="p-6 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div class="w-10 h-10 rounded-xl bg-brand-500 flex items-center justify-center font-bold text-lg shadow-lg shadow-brand-500/30">
+                        CS
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-base leading-tight tracking-wide">Class Scheduler</h1>
+                        <p class="text-[11px] text-slate-400" id="role-subtitle">Dean & Program Chairs</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Menu -->
+            <div class="px-4 py-2 text-xs font-semibold text-slate-400 tracking-wider">
+                MENU
+            </div>
+            <nav class="px-3 space-y-1">
+                <a href="#" onclick="switchTab('dashboard')" id="nav-dashboard" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-300 rounded-xl hover:bg-white/5 transition-all">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                    Dashboard
+                </a>
+                <a href="#" onclick="switchTab('room-availability')" id="nav-room-availability" class="flex items-center gap-3 px-4 py-3 text-sm font-semibold text-white bg-white/15 rounded-xl shadow-inner transition-all">
+                    <span class="w-2 h-2 rounded-full bg-white"></span>
+                    Room Availability
+                </a>
+                <a href="#" onclick="switchTab('create-schedule')" id="nav-create-schedule" class="flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-300 rounded-xl hover:bg-white/5 transition-all">
+                    <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                    Create Schedule
+                </a>
+                <a href="#" onclick="switchTab('room-requests')" id="nav-room-requests" class="flex items-center justify-between px-4 py-3 text-sm font-medium text-slate-300 rounded-xl hover:bg-white/5 transition-all">
+                    <div class="flex items-center gap-3">
+                        <span class="w-2 h-2 rounded-full bg-slate-400"></span>
+                        Room Requests
+                    </div>
+                    <span id="requests-badge" class="bg-amber-500/20 text-amber-300 text-xs px-2 py-0.5 rounded-full font-bold"></span>
+                </a>
+
+                <!-- ADMIN ONLY MENU ITEMS -->
+                <div id="admin-menu-section" class="pt-4 border-t border-white/10 mt-4 hidden">
+                    <div class="px-2 py-1 text-[11px] font-bold text-amber-400 uppercase tracking-wider flex items-center justify-between">
+                        <span>Admin Controls</span>
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <a href="#" onclick="switchTab('admin-rooms')" id="nav-admin-rooms" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-300 rounded-xl hover:bg-white/5 transition-all">
+                        <i class="fa-solid fa-door-open text-xs text-slate-400"></i>
+                        Manage Rooms
+                    </a>
+                    <a href="#" onclick="switchTab('admin-programs')" id="nav-admin-programs" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-300 rounded-xl hover:bg-white/5 transition-all">
+                        <i class="fa-solid fa-graduation-cap text-xs text-slate-400"></i>
+                        Manage Programs
+                    </a>
+                    <a href="#" onclick="switchTab('admin-users')" id="nav-admin-users" class="flex items-center gap-3 px-4 py-2.5 text-sm font-medium text-slate-300 rounded-xl hover:bg-white/5 transition-all">
+                        <i class="fa-solid fa-users-gear text-xs text-slate-400"></i>
+                        User Permissions
+                    </a>
+                </div>
+            </nav>
+        </div>
+
+        <!-- User Profile Area with Role Badge -->
+        <div class="p-4 m-3 bg-white/5 rounded-2xl border border-white/10">
+            <div class="flex items-center justify-between mb-2">
+                <div class="flex items-center gap-3 overflow-hidden">
+                    <div id="user-avatar" class="w-9 h-9 rounded-full bg-brand-500 flex items-center justify-center text-white font-semibold shrink-0 shadow">
+                        <i class="fa-solid fa-user-tie"></i>
+                    </div>
+                    <div class="overflow-hidden">
+                        <h4 id="user-display-name" class="text-sm font-semibold text-white truncate">Program Chair</h4>
+                        <p id="user-display-dept" class="text-xs text-slate-400 truncate">BS Information Tech</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="mt-2 pt-2 border-t border-white/10 flex items-center justify-between text-xs">
+                <span id="role-pill" class="bg-blue-500/20 text-blue-300 px-2.5 py-0.5 rounded-full font-bold text-[10px]">FACULTY</span>
+            </div>
+        </div>
+    </aside>
+
+    <!-- MAIN CONTENT AREA -->
+    <main class="flex-1 flex flex-col overflow-y-auto custom-scrollbar bg-[#f4f6fb]">
+        
+        <!-- Header Topbar -->
+        <header class="pt-7 px-8 pb-4 flex flex-wrap justify-between items-center gap-4 bg-white/50 backdrop-blur-md sticky top-0 z-30 border-b border-slate-200/60">
+            <div>
+                <div class="flex items-center gap-3">
+                    <h2 class="text-2xl font-bold text-slate-900 tracking-tight" id="page-title">Room Availability</h2>
+                    <span id="admin-active-tag" class="hidden bg-amber-500 text-slate-950 font-bold text-[11px] px-2.5 py-0.5 rounded-full uppercase tracking-wider flex items-center gap-1 shadow-sm">
+                        <i class="fa-solid fa-lock"></i> Admin Mode
+                    </span>
+                </div>
+                <p class="text-sm text-slate-500 mt-0.5" id="page-subtitle">See which rooms are free before you schedule a class</p>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div class="bg-blue-50 border border-blue-200/60 text-brand-600 text-xs font-semibold px-4 py-2 rounded-full shadow-sm hidden sm:block">
+                    A.Y. 2026-2027 · 1st Semester
+                </div>
+                <button onclick="sessionStorage.removeItem('ccsjdm_current');location.replace('login.html')" ...>Logout</button>
+            </div>
+        </header>
+
+        <!-- DYNAMIC CONTENT CONTAINER -->
+        <div id="content-container" class="px-8 py-6 flex-1 flex flex-col">
+            
+            <!-- VIEW 1: ROOM AVAILABILITY & TIMETABLE GRID -->
+            <div id="view-room-availability" class="flex-1 flex flex-col space-y-6">
+                <!-- Floor Filter Tabs -->
+                <div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-full custom-scrollbar" id="floor-filter-bar">
+                    <button onclick="filterFloor('ALL')" class="floor-btn px-4 py-2 bg-navy-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all shrink-0">All Rooms</button>
+                    <button onclick="filterFloor('2')" class="floor-btn px-4 py-2 bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 text-xs font-semibold rounded-xl transition-all shrink-0">2nd Floor (201-210)</button>
+                    <button onclick="filterFloor('3')" class="floor-btn px-4 py-2 bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 text-xs font-semibold rounded-xl transition-all shrink-0">3rd Floor (301-310)</button>
+                    <button onclick="filterFloor('4')" class="floor-btn px-4 py-2 bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 text-xs font-semibold rounded-xl transition-all shrink-0">4th Floor (401-410)</button>
+                    <button onclick="filterFloor('5')" class="floor-btn px-4 py-2 bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 text-xs font-semibold rounded-xl transition-all shrink-0">5th Floor (501-510)</button>
+                </div>
+
+                <!-- Room Selection & Program Legend Bar -->
+                <div class="flex flex-wrap items-center justify-between gap-4">
+                    <div class="flex items-center gap-2 overflow-x-auto pb-1 max-w-3xl custom-scrollbar" id="rooms-tab-bar"></div>
+                    <div class="flex items-center gap-3 text-xs font-semibold text-slate-600 bg-white px-4 py-2 rounded-xl border border-slate-200/70 shadow-sm overflow-x-auto" id="program-legend-bar"></div>
+                </div>
+
+                <!-- Schedule Card Box -->
+                <div class="bg-white rounded-3xl border border-slate-200/80 shadow-sm p-6 flex-1 flex flex-col">
+                    <div class="flex flex-wrap justify-between items-center gap-4 mb-6">
+                        <div class="flex items-center gap-3">
+                            <h3 class="text-lg font-bold text-slate-800" id="current-room-header">Room 201 · Weekly schedule</h3>
+                            <span id="room-status-badge" class="bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold">Unlocked</span>
+                        </div>
+                        
+                        <div class="flex items-center gap-2">
+                            <button id="admin-lock-room-btn" onclick="toggleLockCurrentRoom()" class="hidden px-4 py-2 bg-amber-50 border border-amber-200 text-amber-800 hover:bg-amber-100 text-xs font-semibold rounded-xl transition-all">
+                                <i class="fa-solid fa-lock mr-1.5"></i> Lock Room
+                            </button>
+                            <button onclick="clearSchedule()" class="px-4 py-2 border border-slate-300 text-slate-600 hover:bg-slate-50 text-xs font-medium rounded-xl transition-all">
+                                <i class="fa-solid fa-rotate-left mr-1.5"></i> Reset Grid
+                            </button>
+                            <button onclick="openModal()" class="bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold px-5 py-2 rounded-xl shadow-md shadow-brand-500/20 transition-all flex items-center gap-2">
+                                <i class="fa-solid fa-plus"></i> Book this room
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Timetable Grid Container -->
+                    <div class="overflow-x-auto flex-1 custom-scrollbar">
+                        <div class="min-w-[768px] grid grid-cols-7 border-t border-l border-slate-200 rounded-lg relative">
+                            <div class="p-3 font-semibold text-center text-xs text-slate-400 bg-slate-50 border-r border-b border-slate-200 uppercase tracking-wider flex items-center justify-center">Time</div>
+                            <div class="p-3 font-semibold text-center text-sm text-slate-700 bg-slate-50 border-r border-b border-slate-200">Mon</div>
+                            <div class="p-3 font-semibold text-center text-sm text-slate-700 bg-slate-50 border-r border-b border-slate-200">Tue</div>
+                            <div class="p-3 font-semibold text-center text-sm text-slate-700 bg-slate-50 border-r border-b border-slate-200">Wed</div>
+                            <div class="p-3 font-semibold text-center text-sm text-slate-700 bg-slate-50 border-r border-b border-slate-200">Thu</div>
+                            <div class="p-3 font-semibold text-center text-sm text-slate-700 bg-slate-50 border-r border-b border-slate-200">Fri</div>
+                            <div class="p-3 font-semibold text-center text-sm text-slate-700 bg-slate-50 border-r border-b border-slate-200">Sat</div>
+
+                            <div id="grid-cells-template" class="contents"></div>
+                            <div id="schedule-blocks-container" class="absolute inset-0 pointer-events-none"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 2: DASHBOARD -->
+            <div id="view-dashboard" class="hidden space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-5">
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Total Rooms</p>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1" id="dash-stat-rooms">40</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-blue-50 text-brand-600 flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-building-columns"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Scheduled Classes</p>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1" id="dash-stat-classes">0</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-calendar-check"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Pending Requests</p>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1" id="dash-stat-requests">2</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-clock-rotate-left"></i>
+                        </div>
+                    </div>
+                    <div class="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-sm flex items-center justify-between">
+                        <div>
+                            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Active Programs</p>
+                            <h3 class="text-2xl font-bold text-slate-900 mt-1" id="dash-stat-programs">4</h3>
+                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-emerald-50 text-emerald-600 flex items-center justify-center text-xl font-bold">
+                            <i class="fa-solid fa-graduation-cap"></i>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+                    <h3 class="text-base font-bold text-slate-800 mb-4">Quick Room Status Summary</h3>
+                    <div class="overflow-x-auto max-h-96">
+                        <table class="w-full text-sm text-left">
+                            <thead class="text-xs text-slate-400 uppercase bg-slate-50 border-b border-slate-200 sticky top-0">
+                                <tr>
+                                    <th class="px-4 py-3">Room Name</th>
+                                    <th class="px-4 py-3">Floor / Type</th>
+                                    <th class="px-4 py-3">Status</th>
+                                    <th class="px-4 py-3">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dashboard-room-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 3: ROOM REQUESTS -->
+            <div id="view-room-requests" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-900">Faculty Room Requests</h3>
+                    <p class="text-xs text-slate-500 mt-1 mb-5">Approve or reject slot requests from Program Chairs and Faculty</p>
+
+                    <form id="req-form-card" onsubmit="addRoomRequest(event)" class="mb-6">
+                        <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+                            <input type="text" id="req-requester" required placeholder="Requester" class="w-full px-4 py-3 bg-[#f9fafb] border border-slate-300 rounded-xl text-sm outline-none focus:border-[#c026d3]">
+                            <select id="req-room-select" required class="w-full px-4 py-3 bg-[#f9fafb] border border-slate-300 rounded-xl text-sm outline-none focus:border-[#c026d3]"></select>
+                            <input type="text" id="req-subject" required placeholder="Subject / Section" class="w-full px-4 py-3 bg-[#f9fafb] border border-slate-300 rounded-xl text-sm outline-none focus:border-[#c026d3]">
+                            <input type="text" id="req-time" required placeholder="Requested Time e.g. Tue 9:00 AM" class="w-full px-4 py-3 bg-[#f9fafb] border border-slate-300 rounded-xl text-sm outline-none focus:border-[#c026d3]">
+                        </div>
+                        <button type="submit" class="mt-3 w-full md:w-auto px-6 py-2.5 bg-[#7011ce] hover:bg-[#5d0fb0] text-white text-sm font-bold rounded-xl shadow transition-all">+ New Request</button>
+                    </form>
+
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm text-left">
+                            <thead class="bg-[#faf5ff] text-[#7011ce] font-bold border-b border-slate-200">
+                                <tr>
+                                    <th class="px-4 py-3">Requester</th>
+                                    <th class="px-4 py-3">Room</th>
+                                    <th class="px-4 py-3">Subject / Section</th>
+                                    <th class="px-4 py-3">Requested Time</th>
+                                    <th class="px-4 py-3">Status</th>
+                                    <th class="px-4 py-3">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="room-requests-table"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- VIEW 4: ADMIN ROOMS -->
+            <div id="view-admin-rooms" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">Manage Rooms (Admin Only)</h3>
+                            <p class="text-xs text-slate-500">Add, rename, or lock/unlock rooms across the institution</p>
+                        </div>
+                        <button onclick="openAddRoomModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl shadow flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Add New Room
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="admin-rooms-list"></div>
+                </div>
+            </div>
+
+            <!-- VIEW 5: ADMIN PROGRAMS -->
+            <div id="view-admin-programs" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+                    <div class="flex justify-between items-center mb-6">
+                        <div>
+                            <h3 class="text-lg font-bold text-slate-800">Manage Programs & Color Schemes</h3>
+                            <p class="text-xs text-slate-500">Customize academic programs and timetable block colors</p>
+                        </div>
+                        <button onclick="openAddProgramModal()" class="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white text-xs font-semibold rounded-xl shadow flex items-center gap-2">
+                            <i class="fa-solid fa-plus"></i> Add Program
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4" id="admin-programs-list"></div>
+                </div>
+            </div>
+
+            <!-- VIEW 6: ADMIN USERS -->
+            <div id="view-admin-users" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm">
+                    <h3 class="text-lg font-bold text-slate-800 mb-1">User Roles & Permissions</h3>
+                    <p class="text-xs text-slate-500 mb-4">Control who can edit or book room schedules</p>
+                    <input type="text" id="user-search" oninput="renderAdminUsers()" placeholder="Search by name, ID, or role (admin, editor, viewer)..." class="w-full mb-5 px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm outline-none focus:border-[#c026d3]">
+                    <div class="space-y-3" id="admin-users-list"></div>
+                </div>
+            </div>
+
+            <!-- VIEW 7: CREATE SCHEDULE -->
+            <div id="view-create-schedule" class="hidden space-y-6">
+                <div class="bg-white rounded-3xl border border-slate-200/80 p-6 shadow-sm max-w-2xl mx-auto">
+                    <h3 class="text-lg font-bold text-slate-800 mb-2">Create New Class Schedule</h3>
+                    <p class="text-xs text-slate-500 mb-6">Assign section subjects to target rooms efficiently</p>
+                    <form onsubmit="saveSchedule(event)" class="space-y-4">
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Target Room</label>
+                            <input type="text" id="create-subject-input" required placeholder="e.g. Database Management" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Program</label>
+                                <select id="create-program-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium">
+                                     <option value="BPE">BPE</option><option value="BECED">BECED</option><option value="BSNED">BSNED</option><option value="BSIA">BSIA</option><option value="BSMA">BSMA</option><option value="BPA">BPA</option><option value="BEN">BEN</option><option value="BSTM">BSTM</option><option value="BSP">BSP</option><option value="BSSW">BSSW</option><option value="BSHS">BSHS</option><option value="BSCRIM">BSCRIM</option><option value="BSEMC">BSEMC</option><option value="SHS">SHS</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Section</label>
+                                <input type="text" id="create-section-input" required placeholder="e.g. 201" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Subject Name</label>
+                            <input type="text" id="create-subject-input" required placeholder="e.g. Database Management" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                        </div>
+                        <div class="grid grid-cols-3 gap-3">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Day</label>
+                                <select id="create-day-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                                    <option value="Mon">Monday</option><option value="Tue">Tuesday</option><option value="Wed">Wednesday</option><option value="Thu">Thursday</option><option value="Fri">Friday</option><option value="Sat">Saturday</option><option value="Sun">Sunday</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Start Time</label>
+                                <select id="create-time-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                                    <option value="7 AM">7 AM</option><option value="8 AM">8 AM</option><option value="9 AM">9 AM</option><option value="10 AM">10 AM</option><option value="11 AM">11 AM</option><option value="12 PM">12 PM</option><option value="1 PM">1 PM</option><option value="2 PM">2 PM</option><option value="3 PM">3 PM</option><option value="4 PM">4 PM</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Duration</label>
+                                <select id="create-duration-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                                    <option value="1">1 Hour</option><option value="2">2 Hours</option><option value="3">3 Hours</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="w-full py-3 bg-brand-600 text-white font-bold text-sm rounded-xl shadow-lg mt-4">Save Schedule Slot</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- MODAL: BOOKING MODAL -->
+    <div id="booking-modal" class="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+        <div class="bg-white rounded-3xl shadow-2xl border border-slate-100 w-full max-w-md p-6">
+            <div class="flex justify-between items-center mb-5">
+                <h3 class="text-xl font-bold text-slate-900">Book Class Schedule</h3>
+                <button onclick="closeModal()" class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 flex items-center justify-center text-slate-500">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <form id="schedule-form" onsubmit="saveSchedule(event)" class="space-y-4">
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Program / Course</label>
+                    <select id="modal-program-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm font-medium">
+                     <option value="BPE">BPE</option><option value="BECED">BECED</option><option value="BSNED">BSNED</option><option value="BSIA">BSIA</option><option value="BSMA">BSMA</option><option value="BPA">BPA</option><option value="BEN">BEN</option><option value="BSTM">BSTM</option><option value="BSP">BSP</option><option value="BSSW">BSSW</option><option value="BSHS">BSHS</option><option value="BSCRIM">BSCRIM</option><option value="BSEMC">BSEMC</option><option value="SHS">SHS</option>
+                </select>
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Section Code</label>
+                    <input type="text" id="modal-section-input" required placeholder="e.g. BSEMC 1A" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                </div>
+                <div>
+                    <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Subject Title</label>
+                    <input type="text" id="modal-subject-input" required placeholder="e.g. Data Structures" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
+                </div>
+                <div class="grid grid-cols-3 gap-2">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Day</label>
+                        <select id="modal-day-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
+                            <option value="Mon">Mon</option><option value="Tue">Tue</option><option value="Wed">Wed</option><option value="Thu">Thu</option><option value="Fri">Fri</option><option value="Sat">Sat</option><option value="Sat">Sunday</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Time</label>
+                        <select id="modal-time-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
+                            <option value="7 AM">7 AM</option><option value="8 AM">8 AM</option><option value="9 AM">9 AM</option><option value="10 AM">10 AM</option><option value="11 AM">11 AM</option><option value="12 PM">12 PM</option><option value="1 PM">1 PM</option><option value="2 PM">2 PM</option><option value="3 PM">3 PM</option><option value="4 PM">4 PM</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-600 uppercase tracking-wider mb-1">Hours</label>
+                        <select id="modal-duration-select" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-3 py-2 text-sm">
+                            <option value="1">1 hr</option><option value="2">2 hrs</option><option value="3">3 hrs</option>
+                        </select>
+                    </div>
+                </div>
+                <button type="submit" class="w-full py-3 bg-brand-600 text-white font-bold text-sm rounded-xl shadow-lg mt-2">Confirm Booking</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        const roomsData = [];
+        const floors = [
+            { floor: '2', prefix: 'Room 2', range: [1, 10] },
+            { floor: '3', prefix: 'Room 3', range: [1, 10] },
+            { floor: '4', prefix: 'Room 4', range: [1, 10] },
+            { floor: '5', prefix: 'Room 5', range: [1, 10] }
+        ];
+
+        floors.forEach(f => {
+            for (let i = f.range[0]; i <= f.range[1]; i++) {
+                let roomNum = i < 10 ? `0${i}` : `${i}`;
+                let exactName = `Room ${f.floor}${i < 10 ? '0' + i : i}`;
+                roomsData.push({
+                    id: exactName.toLowerCase().replace(/\s+/g, '-'),
+                    name: exactName,
+                    floor: f.floor,
+                    type: 'Lecture Hall',
+                    capacity: 45,
+                    locked: false,
+                    schedules: []
+                });
+            }
+        });
+
+        let currentFloorFilter = 'ALL';
+        let currentRoomId = roomsData[0].id;
+        let currentUser = null;
+        let currentRole = 'viewer';
+        let isAdmin = false; // admin or superadmin
+
+        let requestsList = [
+           
+        ];
+
+        const coursePalette = [
+            'bg-blue-50 border-blue-200 text-blue-900',
+            'bg-amber-50 border-amber-200 text-amber-900',
+            'bg-emerald-50 border-emerald-200 text-emerald-900',
+            'bg-purple-50 border-purple-200 text-purple-900',
+            'bg-rose-50 border-rose-200 text-rose-900',
+            'bg-cyan-50 border-cyan-200 text-cyan-900',
+            'bg-indigo-50 border-indigo-200 text-indigo-900',
+            'bg-lime-50 border-lime-200 text-lime-900'
+        ];
+
+        const courseCodes = ['BPE', 'BECED', 'BSNED', 'BSIA', 'BSMA', 'BPA', 'BEN', 'BSTM', 'BSP', 'BSSW', 'BSHS', 'BSCRIM', 'BSEMC', 'SHS'];
+
+        const programs = courseCodes.map((code, i) => ({
+            code: code,
+            name: code,
+            color: coursePalette[i % coursePalette.length]
+        }));
+
+        const timeSlots = ['7 AM', '8 AM', '9 AM', '10 AM', '11 AM', '12 PM', '1 PM', '2 PM', '3 PM', '4 PM'];
+        const days = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+        function initApp() {
+            if (!bootSession()) return;
+            renderRoomsTabs();
+            renderProgramLegend();
+            renderGridCells();
+            renderDashboard();
+            renderRequests();
+            renderAdminRooms();
+            renderAdminPrograms();
+            renderAdminUsers();
+            populateSelects();
+            loadScheduleBlocks();
+            updateRoleUI();
+        }
+
+        function filterFloor(floor) {
+            currentFloorFilter = floor;
+            document.querySelectorAll('.floor-btn').forEach(btn => {
+                btn.className = "floor-btn px-4 py-2 bg-white text-slate-600 hover:bg-slate-100 border border-slate-200 text-xs font-semibold rounded-xl transition-all shrink-0";
+            });
+            event.target.className = "floor-btn px-4 py-2 bg-navy-900 text-white text-xs font-bold rounded-xl shadow-sm transition-all shrink-0";
+            renderRoomsTabs();
+        }
+
+        function renderRoomsTabs() {
+            const bar = document.getElementById('rooms-tab-bar');
+            bar.innerHTML = '';
+            const filteredRooms = currentFloorFilter === 'ALL' ? roomsData : roomsData.filter(r => r.floor === currentFloorFilter);
+            
+            filteredRooms.forEach(room => {
+                const isSelected = room.id === currentRoomId;
+                const btn = document.createElement('button');
+                btn.className = `px-4 py-2 rounded-xl text-xs font-semibold transition-all shrink-0 border ${isSelected ? 'bg-navy-900 text-white border-navy-900 shadow' : 'bg-white text-slate-600 border-slate-200 hover:bg-slate-50'}`;
+                btn.innerHTML = `${room.name} ${room.locked ? '<i class="fa-solid fa-lock text-[10px] ml-1 text-amber-400"></i>' : ''}`;
+                btn.onclick = () => selectRoom(room.id);
+                bar.appendChild(btn);
+            });
+        }
+
+        function selectRoom(roomId) {
+            currentRoomId = roomId;
+            renderRoomsTabs();
+            loadScheduleBlocks();
+            const room = roomsData.find(r => r.id === roomId);
+            document.getElementById('current-room-header').innerText = `${room.name} · Weekly schedule`;
+            const badge = document.getElementById('room-status-badge');
+            badge.innerText = room.locked ? 'Locked (Admin)' : 'Unlocked';
+            badge.className = room.locked ? 'bg-amber-100 text-amber-800 text-xs px-2.5 py-0.5 rounded-full font-bold' : 'bg-emerald-100 text-emerald-800 text-xs px-2.5 py-0.5 rounded-full font-bold';
+        }
+
+        function renderProgramLegend() {
+            const bar = document.getElementById('program-legend-bar');
+            bar.innerHTML = programs.map(p => `<span class="flex items-center gap-1.5"><span class="w-3 h-3 rounded-full ${p.color.split(' ')[0]} border ${p.color.split(' ')[1]}"></span>${p.code}</span>`).join('');
+        }
+
+        function renderGridCells() {
+            const container = document.getElementById('grid-cells-template');
+            let html = '';
+            timeSlots.forEach(time => {
+                html += `<div class="p-3 text-xs text-slate-400 bg-slate-50 border-r border-b border-slate-200 font-medium text-center flex items-center justify-center">${time}</div>`;
+                days.forEach(day => {
+                    html += `<div class="border-r border-b border-slate-200 min-h-[60px] bg-white hover:bg-slate-50/50 transition-colors cursor-pointer" onclick="quickBook('${day}', '${time}')"></div>`;
+                });
+            });
+            container.innerHTML = html;
+        }
+
+        function loadScheduleBlocks() {
+            const container = document.getElementById('schedule-blocks-container');
+            container.innerHTML = '';
+            const room = roomsData.find(r => r.id === currentRoomId);
+            if (!room || !room.schedules) return;
+
+            room.schedules.forEach((sch, index) => {
+                const dayIndex = days.indexOf(sch.day);
+                const timeIndex = timeSlots.indexOf(sch.time);
+                if (dayIndex === -1 || timeIndex === -1) return;
+
+                const progObj = programs.find(p => p.code === sch.program) || programs[0];
+                const block = document.createElement('div');
+                block.className = `absolute p-2.5 rounded-xl border shadow-sm pointer-events-auto flex flex-col justify-between ${progObj.color}`;
+                
+                const leftPercent = 14.28 + (dayIndex * 14.28);
+                const topPercent = (timeIndex * 10) + 5.5;
+                const heightPercent = sch.duration * 10;
+
+                block.style.left = `calc(${leftPercent}% + 2px)`;
+                block.style.top = `calc(${topPercent}% + 2px)`;
+                block.style.width = `calc(14.28% - 4px)`;
+                block.style.height = `calc(${heightPercent}% - 4px)`;
+
+                block.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start">
+                            <span class="font-bold text-xs">${sch.section}</span>
+                            ${isAdmin ? `<button onclick="deleteSchedule(${index})" class="text-slate-400 hover:text-red-600"><i class="fa-solid fa-trash text-[10px]"></i></button>` : ''}
+                        </div>
+                        <p class="text-[11px] opacity-80 truncate">${sch.subject}</p>
+                    </div>
+                    <span class="text-[9px] opacity-60">${sch.time} (${sch.duration}h)</span>
+                `;
+                container.appendChild(block);
+            });
+        }
+
+        function quickBook(day, time) {
+            if (!canEditSchedule()) return;
+            document.getElementById('modal-day-select').value = day;
+            document.getElementById('modal-time-select').value = time;
+            openModal();
+        }
+
+        function openModal() { document.getElementById('booking-modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('booking-modal').classList.add('hidden'); }
+
+        const ROLE_LABELS = { superadmin: 'SUPER ADMIN', admin: 'ADMINISTRATOR', editor: 'EDITOR', viewer: 'VIEWER' };
+        const ROLE_DEPT = { superadmin: 'Institutional IT Services', admin: 'Institutional IT Services', editor: 'Scheduling Editor', viewer: 'View Only' };
+
+        function normalizeRole(r) {
+            const v = String(r || '').toLowerCase();
+            return ['superadmin', 'admin', 'editor', 'viewer'].includes(v) ? v : 'viewer';
+        }
+
+        function getUsersList() {
+            try { return JSON.parse(localStorage.getItem('ccsjdm_users')) || []; } catch (e) { return []; }
+        }
+
+        function saveUsersList(list) {
+            localStorage.setItem('ccsjdm_users', JSON.stringify(list));
+        }
+
+        function getSessionUser() {
+            try { return JSON.parse(sessionStorage.getItem('ccsjdm_current')); } catch (e) { return null; }
+        }
+
+        // Kinukuha ang session; kapag walang login, ibabalik sa login page
+        function bootSession() {
+            const su = getSessionUser();
+            if (!su) {
+                location.replace('login.html');
+                return false;
+            }
+            const fresh = getUsersList().find(u => String(u.id).toLowerCase() === String(su.id).toLowerCase());
+            currentUser = fresh || su;
+            currentRole = normalizeRole(currentUser.role);
+            isAdmin = currentRole === 'admin' || currentRole === 'superadmin';
+            return true;
+        }
+
+        function canEditSchedule() {
+            return isAdmin || currentRole === 'editor';
+        }
+
+        function handleLogout() {
+            sessionStorage.removeItem('ccsjdm_current');
+            location.replace('login.html');
+        }
+
+        function updateRoleUI() {
+            const canEdit = canEditSchedule();
+            const adminMenu = document.getElementById('admin-menu-section');
+            const rolePill = document.getElementById('role-pill');
+            const activeTag = document.getElementById('admin-active-tag');
+            const lockBtn = document.getElementById('admin-lock-room-btn');
+            const bookBtn = document.querySelector('button[onclick="openModal()"]');
+            const resetBtn = document.querySelector('button[onclick="clearSchedule()"]');
+            const reqCard = document.getElementById('req-form-card');
+            const navCreate = document.getElementById('nav-create-schedule');
+            const navRequests = document.getElementById('nav-room-requests');
+
+            adminMenu.classList.toggle('hidden', !isAdmin);
+            activeTag.classList.toggle('hidden', !isAdmin);
+            lockBtn.classList.toggle('hidden', !isAdmin);
+            if (bookBtn) bookBtn.classList.toggle('hidden', !canEdit);
+            if (resetBtn) resetBtn.classList.toggle('hidden', !canEdit);
+            if (reqCard) reqCard.classList.toggle('hidden', !canEdit);
+            if (navCreate) navCreate.classList.toggle('hidden', !canEdit);
+            if (navRequests) navRequests.classList.toggle('hidden', !canEdit);
+
+            const pillStyle = {
+                superadmin: 'bg-amber-500/25 text-amber-300',
+                admin: 'bg-amber-500/25 text-amber-300',
+                editor: 'bg-emerald-500/20 text-emerald-300',
+                viewer: 'bg-blue-500/20 text-blue-300'
+            };
+            rolePill.innerText = ROLE_LABELS[currentRole];
+            rolePill.className = pillStyle[currentRole] + ' px-2.5 py-0.5 rounded-full font-bold text-[10px]';
+            document.getElementById('user-display-name').innerText = currentUser.fullName || currentUser.id;
+            document.getElementById('user-display-dept').innerText = ROLE_DEPT[currentRole];
+            document.getElementById('requests-badge').innerText = requestsList.length;
+
+            renderRoomsTabs();
+            loadScheduleBlocks();
+            renderRequests();
+            renderAdminUsers();
+        }
+
+        function saveSchedule(e) {
+            e.preventDefault();
+            const roomSelect = document.getElementById('create-room-select') ? document.getElementById('create-room-select').value : currentRoomId;
+            const targetRoom = roomsData.find(r => r.id === roomSelect) || roomsData.find(r => r.id === currentRoomId);
+            
+            const schedule = {
+                program: document.getElementById('modal-program-select')?.value || document.getElementById('create-program-select').value,
+                section: document.getElementById('modal-section-input')?.value || document.getElementById('create-section-input').value,
+                subject: document.getElementById('modal-subject-input')?.value || document.getElementById('create-subject-input').value,
+                day: document.getElementById('modal-day-select')?.value || document.getElementById('create-day-select').value,
+                time: document.getElementById('modal-time-select')?.value || document.getElementById('create-time-select').value,
+                duration: parseInt(document.getElementById('modal-duration-select')?.value || document.getElementById('create-duration-select').value)
+            };
+
+            targetRoom.schedules.push(schedule);
+            closeModal();
+            loadScheduleBlocks();
+            renderDashboard();
+            alert('Schedule successfully saved!');
+        }
+
+        function deleteSchedule(index) {
+            const room = roomsData.find(r => r.id === currentRoomId);
+            room.schedules.splice(index, 1);
+            loadScheduleBlocks();
+            renderDashboard();
+        }
+
+        function clearSchedule() {
+            const room = roomsData.find(r => r.id === currentRoomId);
+            room.schedules = [];
+            loadScheduleBlocks();
+            renderDashboard();
+        }
+
+        function switchTab(tabId) {
+            const views = ['room-availability', 'dashboard', 'room-requests', 'admin-rooms', 'admin-programs', 'admin-users', 'create-schedule'];
+            views.forEach(v => {
+                const el = document.getElementById(`view-${v}`);
+                if (el) el.classList.add('hidden');
+                const nav = document.getElementById(`nav-${v}`);
+                if (nav) nav.className = "flex items-center gap-3 px-4 py-3 text-sm font-medium text-slate-300 rounded-xl hover:bg-white/5 transition-all";
+            });
+
+            document.getElementById(`view-${tabId}`).classList.remove('hidden');
+            const activeNav = document.getElementById(`nav-${tabId}`);
+            if (activeNav) activeNav.className = "flex items-center gap-3 px-4 py-3 text-sm font-semibold text-white bg-white/15 rounded-xl shadow-inner transition-all";
+            document.getElementById('page-title').innerText = tabId.replace(/-/g, ' ').toUpperCase();
+        }
+
+        function toggleLockCurrentRoom() {
+            const room = roomsData.find(r => r.id === currentRoomId);
+            room.locked = !room.locked;
+            selectRoom(currentRoomId);
+            renderAdminRooms();
+        }
+
+        function populateSelects() {
+            const progSelects = [document.getElementById('modal-program-select'), document.getElementById('create-program-select')];
+            progSelects.forEach(sel => {
+                if (!sel) return;
+                sel.innerHTML = programs.map(p => `<option value="${p.code}">${p.code}</option>`).join('');
+            });
+
+            const reqRoom = document.getElementById('req-room-select');
+            if (reqRoom) reqRoom.innerHTML = roomsData.map(r => `<option value="${r.name}">${r.name}</option>`).join('');
+
+            const roomSelects = [document.getElementById('create-room-select')];
+            roomSelects.forEach(sel => {
+                if (!sel) return;
+                sel.innerHTML = roomsData.map(r => `<option value="${r.id}">${r.name} (Floor ${r.floor})</option>`).join('');
+            });
+        }
+
+        function renderDashboard() {
+            document.getElementById('dash-stat-rooms').innerText = roomsData.length;
+            let totalClasses = roomsData.reduce((acc, r) => acc + (r.schedules ? r.schedules.length : 0), 0);
+            document.getElementById('dash-stat-classes').innerText = totalClasses;
+            document.getElementById('dash-stat-programs').innerText = programs.length;
+
+            const tbody = document.getElementById('dashboard-room-table');
+            tbody.innerHTML = roomsData.slice(0, 10).map(r => `
+                <tr class="border-b border-slate-100 hover:bg-slate-50">
+                    <td class="px-4 py-3 font-semibold text-slate-800">${r.name}</td>
+                    <td class="px-4 py-3 text-slate-500">Floor ${r.floor} · Lecture</td>
+                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-bold ${r.locked ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800'}">${r.locked ? 'Locked' : 'Available'}</span></td>
+                    <td class="px-4 py-3"><button onclick="selectRoom('${r.id}'); switchTab('room-availability');" class="text-brand-600 hover:underline font-semibold text-xs">View Schedule</button></td>
+                </tr>
+            `).join('');
+        }
+
+        function renderRequests() {
+            const tbody = document.getElementById('room-requests-table');
+            const dash = document.getElementById('dash-stat-requests');
+            if (dash) dash.innerText = requestsList.length;
+            tbody.innerHTML = requestsList.map(req => `
+                <tr class="border-b border-slate-100">
+                    <td class="px-4 py-3 font-semibold text-slate-800">${req.requester}</td>
+                    <td class="px-4 py-3 text-slate-600">${req.room}</td>
+                    <td class="px-4 py-3 text-slate-600">${req.subject}</td>
+                    <td class="px-4 py-3 text-slate-600">${req.time}</td>
+                    <td class="px-4 py-3"><span class="px-2 py-0.5 rounded-full text-xs font-bold bg-amber-100 text-amber-800">${req.status}</span></td>
+                    <td class="px-4 py-3 flex gap-2">${isAdmin ? `<button onclick="approveRequest(${req.id})" class="px-3 py-1 bg-emerald-600 text-white rounded-lg text-xs font-semibold">Approve</button><button onclick="rejectRequest(${req.id})" class="px-3 py-1 bg-red-100 text-red-600 rounded-lg text-xs font-semibold">Reject</button>` : '<span class="text-xs text-slate-400">View only</span>'}</td>
+                </tr>
+            `).join('') || '<tr><td colspan="6" class="px-4 py-6 text-center text-slate-500">No requests found.</td></tr>';
+        }
+
+        function addRoomRequest(e) {
+            e.preventDefault();
+            const requester = document.getElementById('req-requester').value.trim();
+            const room = document.getElementById('req-room-select').value;
+            const subject = document.getElementById('req-subject').value.trim();
+            const time = document.getElementById('req-time').value.trim();
+            if (!requester || !room || !subject || !time) return;
+            requestsList.push({ id: Date.now(), requester, room, subject, time, status: 'Pending' });
+            e.target.reset();
+            document.getElementById('requests-badge').innerText = requestsList.length;
+            renderRequests();
+        }
+
+        function approveRequest(id) {
+            requestsList = requestsList.filter(r => r.id !== id);
+            document.getElementById('requests-badge').innerText = requestsList.length;
+            renderRequests();
+            alert('Request approved and schedule updated!');
+        }
+
+        function rejectRequest(id) {
+            requestsList = requestsList.filter(r => r.id !== id);
+            document.getElementById('requests-badge').innerText = requestsList.length;
+            renderRequests();
+        }
+
+        function renderAdminRooms() {
+            const list = document.getElementById('admin-rooms-list');
+            list.innerHTML = roomsData.map(r => `
+                <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">${r.name}</h4>
+                        <p class="text-xs text-slate-500">Floor ${r.floor} · ${r.locked ? 'Locked' : 'Unlocked'}</p>
+                    </div>
+                    <button onclick="selectRoom('${r.id}'); toggleLockCurrentRoom();" class="px-3 py-1.5 rounded-xl text-xs font-semibold ${r.locked ? 'bg-amber-600 text-white' : 'bg-slate-200 text-slate-700'}">
+                        ${r.locked ? 'Unlock' : 'Lock'}
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function renderAdminPrograms() {
+            const list = document.getElementById('admin-programs-list');
+            list.innerHTML = programs.map(p => `
+                <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex items-center justify-between">
+                    <div>
+                        <h4 class="font-bold text-slate-800 text-sm">${p.code}</h4>
+                    </div>
+                    <span class="w-6 h-6 rounded-full ${p.color.split(' ')[0]} border ${p.color.split(' ')[1]}"></span>
+                </div>
+            `).join('');
+        }
+
+        function canChangeRole(target, newRole) {
+            const r = normalizeRole(target.role);
+            if (currentUser && String(target.id).toLowerCase() === String(currentUser.id).toLowerCase()) return false;
+            if (r === 'superadmin') return false;
+            if (currentRole === 'superadmin') return ['admin', 'editor', 'viewer'].includes(newRole);
+            if (currentRole === 'admin') return r !== 'admin' && ['editor', 'viewer'].includes(newRole);
+            return false;
+        }
+
+        function renderAdminUsers() {
+            const list = document.getElementById('admin-users-list');
+            if (!list) return;
+            const q = (document.getElementById('user-search')?.value || '').trim().toLowerCase();
+            const users = getUsersList()
+                .map((u, i) => ({ u, i }))
+                .filter(({ u }) => !q || [u.fullName, u.id, u.role, ROLE_LABELS[normalizeRole(u.role)]]
+                    .some(v => String(v || '').toLowerCase().includes(q)));
+            list.innerHTML = users.map(({ u, i }) => {
+                const r = normalizeRole(u.role);
+                const choices = ['superadmin', 'admin', 'editor', 'viewer'].filter(c => c !== 'superadmin' && (canChangeRole(u, c) || c === r));
+                const locked = !canChangeRole(u, choices[0] || r) && choices.length <= 1;
+                return `
+                <div class="p-4 rounded-2xl border border-slate-200 bg-slate-50 flex justify-between items-center gap-4">
+                    <div>
+                        <h4 class="font-bold text-sm text-slate-800">${u.fullName || u.id}</h4>
+                        <p class="text-xs text-slate-500">ID: ${u.id}</p>
+                    </div>
+                    <select ${locked ? 'disabled' : ''} onchange="changeUserRole(${i}, this.value)" class="px-3 py-1.5 rounded-xl border border-slate-200 text-xs font-semibold bg-white">
+                        ${(locked ? [r] : choices).map(c => `<option value="${c}" ${c === r ? 'selected' : ''}>${ROLE_LABELS[c]}</option>`).join('')}
+                    </select>
+                </div>`;
+            }).join('') || '<p class="text-sm text-slate-500">No users found.</p>';
+        }
+
+        function changeUserRole(index, newRole) {
+            const users = getUsersList();
+            const target = users[index];
+            if (!target) return;
+            if (!canChangeRole(target, newRole)) {
+                alert('Hindi mo pwedeng gawin iyan.');
+                renderAdminUsers();
+                return;
+            }
+            target.role = newRole;
+            saveUsersList(users);
+            renderAdminUsers();
+            alert(`Na-update ang role ni ${target.fullName || target.id} → ${ROLE_LABELS[newRole]}`);
+        }
+
+        function openAddRoomModal() {
+            const roomName = prompt("Enter new room name (e.g. Room 601):");
+            const floorNum = prompt("Enter floor number (e.g. 6):");
+            if (roomName && floorNum) {
+                roomsData.push({
+                    id: roomName.toLowerCase().replace(/\s+/g, '-'),
+                    name: roomName,
+                    floor: floorNum,
+                    type: 'Lecture Hall',
+                    capacity: 45,
+                    locked: false,
+                    schedules: []
+                });
+                renderRoomsTabs();
+                renderAdminRooms();
+                renderDashboard();
+                alert('New room successfully added!');
+            }
+        }
+
+        function openAddProgramModal() {
+            const code = prompt("Enter program code (e.g. BSCE):");
+            if (code) {
+                const upper = code.toUpperCase();
+                programs.push({ code: upper, name: upper, color: coursePalette[programs.length % coursePalette.length] });
+                renderProgramLegend();
+                renderAdminPrograms();
+                populateSelects();
+                alert('New program successfully added!');
+            }
+        }
+
+        window.onload = initApp;
+    </script>
+</body>
+</html>

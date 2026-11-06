@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+      <link rel="icon" type="image/png" href="backgroundcc.jpg">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCSJDM | Create Account</title>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:24px;background:#0b0f19;color:#f5f3ff;font-family:"Segoe UI",Tahoma,Arial,sans-serif}
+.wrap{width:100%;max-width:560px}
+.card{padding:40px 34px;border:1px solid rgba(255,255,255,.12);border-radius:26px;background:rgba(255,255,255,.04);box-shadow:0 30px 80px rgba(0,0,0,.6);animation:rise .7s cubic-bezier(.2,.8,.2,1)}
+@keyframes rise{from{opacity:0;transform:translateY(24px)}to{opacity:1;transform:none}}
+.logo{width:84px;height:84px;margin:0 auto 16px;padding:3px;border-radius:50%;background:linear-gradient(135deg,#d946ef,#3b82f6);box-shadow:0 0 30px rgba(217,70,239,.35)}
+.logo img{width:100%;height:100%;border-radius:50%;object-fit:cover;display:block}
+h1{text-align:center;font-size:1.8rem;font-weight:800;background:linear-gradient(90deg,#f0abfc,#c4b5fd,#93c5fd);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+.sub{margin:6px 0 26px;text-align:center;color:#a1a1c2;font-size:.75rem;letter-spacing:.12em;text-transform:uppercase}
+.alert{margin-bottom:20px;padding:12px 14px;border-radius:12px;font-size:.88rem;text-align:center;border:1px solid rgba(248,113,113,.4);background:rgba(239,68,68,.12);color:#fca5a5}
+.alert[hidden]{display:none}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:0 16px}
+.field{margin-bottom:20px}
+.full{grid-column:1/-1}
+label{display:block;margin-bottom:8px;color:#c4b5fd;font-size:.75rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase}
+input,select{width:100%;padding:14px 16px;border:1px solid rgba(255,255,255,.12);border-radius:14px;outline:none;color:#fff;background:rgba(255,255,255,.06);font-family:inherit;font-size:16px;transition:border-color .25s,box-shadow .25s}
+select{appearance:none;cursor:pointer}
+select option{background:#0b0f19;color:#fff}
+input::placeholder{color:#6b6b8a}
+input:focus,select:focus{border-color:#d946ef;box-shadow:0 0 0 4px rgba(217,70,239,.18)}
+.btn{width:100%;margin-top:6px;padding:15px;border:0;border-radius:14px;color:#fff;font-family:inherit;font-size:16px;font-weight:700;letter-spacing:.04em;background:linear-gradient(135deg,#7011ce,#c026d3 55%,#3b82f6);box-shadow:0 12px 30px rgba(192,38,211,.35);cursor:pointer;transition:transform .3s}
+.btn:hover:not(:disabled){transform:translateY(-2px)}
+.btn:disabled{opacity:.6;cursor:not-allowed}
+.links{margin-top:26px;display:grid;gap:10px;justify-items:center;text-align:center;color:#a1a1c2;font-size:.9rem}
+.links a{text-decoration:none}
+.pill{display:inline-block;padding:10px 20px;border:1px solid rgba(255,255,255,.2);border-radius:999px;color:#fff;font-weight:700;transition:background .25s}
+.pill:hover{background:rgba(255,255,255,.1)}
+.footer{margin-top:22px;text-align:center;color:#6b6b8a;font-size:.78rem}
+@media(max-width:520px){.grid{grid-template-columns:1fr}.card{padding:30px 22px}h1{font-size:1.6rem}}
+
+/* ===== RESPONSIVE (PC + cellphone) ===== */
+@media (max-width: 480px) {
+    body {
+        padding: 14px;
+        align-items: flex-start;
+    }
+    .card {
+        margin-top: 12px;
+        padding: 26px 18px;
+        border-radius: 20px;
+    }
+    .logo {
+        width: 72px;
+        height: 72px;
+    }
+    h1 {
+        font-size: 1.5rem;
+    }
+    .sub {
+        font-size: .68rem;
+        margin-bottom: 20px;
+    }
+    .field {
+        margin-bottom: 14px;
+    }
+    input, select {
+        font-size: 16px;
+        padding: 13px 14px;
+    }
+    .links {
+        margin-top: 20px;
+    }
+}
+
+@media (min-width: 1024px) {
+    .wrap {
+        max-width: 620px;
+    }
+}
+
+</style>
+</head>
+<body>
+<main class="wrap">
+  <section class="card">
+    <div class="logo"><img src="backgroundcc.jpg" alt="CCSJDM Logo"></div>
+    <h1>Create Account</h1>
+    <p class="sub">Register sa CCSJDM system</p>
+
+    <div class="alert" id="err" role="alert" hidden></div>
+
+    <form id="signupForm" novalidate>
+      <div class="grid">
+        <div class="field full">
+          <label for="fullName">Full Name</label>
+          <input type="text" id="fullName" maxlength="100" placeholder="Juan Dela Cruz" autocomplete="name">
+        </div>
+        <div class="field">
+          <label for="sid">Professor ID</label>
+          <input type="text" id="sid" maxlength="50" placeholder="e.g. PROF-1024" autocomplete="username">
+        </div>
+        <div class="field">
+          <label for="program">Program</label>
+          <select id="program">
+            <option value="">Select Program</option>
+            <option value="BSEMC">BSEMC</option>
+            <option value="TOURISM">TOURISM</option>
+            <option value="CRIMINOLOGY">CRIMINOLOGY</option>
+            <option value="EDUC">EDUC</option>
+            <option value="PSYCHOLOGY">PSYCHOLOGY</option>
+            <option value="BSMA">BSMA</option>
+            <option value="BEN">BEN</option>
+            <option value="HUMANISTA">HUMANISTA</option>
+            <option value="SOCIAL WORK">SOCIAL WORK</option>
+            <option value="OTHER">Other Program...</option>
+          </select>
+        </div>
+        <div class="field full">
+          <label for="email">Email (optional)</label>
+          <input type="email" id="email" maxlength="120" placeholder="name@email.com" autocomplete="email">
+        </div>
+        <div class="field">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="At least 8 characters" autocomplete="new-password">
+        </div>
+        <div class="field">
+          <label for="confirm">Confirm Password</label>
+          <input type="password" id="confirm" placeholder="Retype password" autocomplete="new-password">
+        </div>
+      </div>
+      <button type="submit" class="btn" id="btn">Create Account</button>
+    </form>
+
+    <div class="links">
+      <span>May account ka na?</span>
+      <a href="login.html" class="pill">Back to Login</a>
+    </div>
+  </section>
+  <p class="footer">City College of San Jose Del Monte</p>
+</main>
+
+<script>
+const $ = id => document.getElementById(id);
+const err = $("err");
+const btn = $("btn");
+
+function showError(text) {
+  err.textContent = text;
+  err.hidden = false;
+}
+
+$("signupForm").addEventListener("submit", async (e) => {
+  e.preventDefault();
+  err.hidden = true;
+
+  const payload = {
+    fullName: $("fullName").value.trim(),
+    id:       $("sid").value.trim(),
+    program:  $("program").value,
+    email:    $("email").value.trim(),
+    password: $("password").value,
+  };
+  const confirm = $("confirm").value;
+
+  if (!payload.fullName || !payload.id || !payload.program || !payload.password)
+    return showError("Punan ang lahat ng kinakailangang field.");
+  if (payload.email && !/^\S+@\S+\.\S+$/.test(payload.email))
+    return showError("Ilagay ang tamang email address.");
+  if (payload.password.length < 8)
+    return showError("Dapat at least 8 characters ang password.");
+  if (payload.password !== confirm)
+    return showError("Hindi nagtutugma ang password.");
+
+  btn.disabled = true;
+  btn.textContent = "Creating account...";
+
+  try {
+    const res = await fetch("/api/auth/signup", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!res.ok) return showError(data.error);
+    location.href = "login.html?created=1";
+  } catch (error) {
+    showError("Hindi maabot ang server. Subukan ulit.");
+  } finally {
+    btn.disabled = false;
+    btn.textContent = "Create Account";
+  }
+});
+</script>
+</body>
+</html>
